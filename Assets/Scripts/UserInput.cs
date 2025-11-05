@@ -3,10 +3,12 @@ using UnityEngine.InputSystem;
 
 public class UserInput : MonoBehaviour
 {
+    private Player player;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        Debug.Log("Start user input");
+        player = GameObject.Find("Player").GetComponent<Player>();
     }
 
     // Update is called once per frame
@@ -46,25 +48,36 @@ public class UserInput : MonoBehaviour
             return;
         }
 
-        bool lShift = keyboard.leftShiftKey.isPressed;
-        bool lCtrl = keyboard.leftCtrlKey.isPressed;
+        player.Run(keyboard.leftShiftKey.isPressed);
+        player.Sneak(keyboard.leftCtrlKey.isPressed);
         bool escape = keyboard.escapeKey.isPressed;
+
+        // Movement
+        Vector2 direction = Vector2.zero;
 
         if (keyboard.sKey.isPressed || keyboard.downArrowKey.isPressed)
         {
-            Debug.Log("S | Downd");
+            direction.y -= 1;
         }
         if (keyboard.aKey.isPressed || keyboard.leftArrowKey.isPressed)
         {
-            Debug.Log("A | Left");
+            direction.x -= 1;
         }
         if (keyboard.dKey.isPressed || keyboard.rightArrowKey.isPressed)
         {
-            Debug.Log("D | Right");
+            direction.x += 1;
         }
         if (keyboard.wKey.isPressed || keyboard.upArrowKey.isPressed)
         {
-            Debug.Log("W | Up");
+            direction.y += 1;
+        }
+
+        player.Move(direction);
+
+        // Jump
+        if (keyboard.spaceKey.isPressed)
+        {
+            player.Jump();
         }
     }
 
