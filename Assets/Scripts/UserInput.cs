@@ -5,6 +5,12 @@ public class UserInput : MonoBehaviour
 {
     private Player player;
 
+    private Vector2 direction;
+
+    private bool jump;
+    private bool run;
+    private bool sneak;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -14,9 +20,28 @@ public class UserInput : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        // Reset variables
+        direction = Vector2.zero;
+
+        jump = false;
+        run = false;
+        sneak = false;
+
+        // Get inputs
         GamepadInput();
         KeyboardInput();
         MouseInput();
+
+        // Apply inputs
+        player.Run(run);
+        player.Sneak(sneak);
+
+        player.Move(direction);
+
+        if (jump)
+        {
+            player.Jump();
+        }
     }
 
     void GamepadInput()
@@ -28,15 +53,21 @@ public class UserInput : MonoBehaviour
             return;
         }
 
-        Vector2 leftStick = gamepad.leftStick.ReadValue();
+        bool startButton = gamepad.startButton.isPressed;
+
+        // Movement
+        direction = gamepad.leftStick.ReadValue();
+
+        // Camera
         Vector2 rightStick = gamepad.rightStick.ReadValue();
 
-        bool aButton = gamepad.aButton.isPressed;
+        jump |= gamepad.aButton.isPressed;
+        run |= gamepad.leftStickButton.isPressed;
+        sneak |= gamepad.leftShoulder.isPressed;
+
         bool bButton = gamepad.bButton.isPressed;
         bool xButton = gamepad.xButton.isPressed;
         bool yButton = gamepad.yButton.isPressed;
-
-        bool startButton = gamepad.startButton.isPressed;
     }
 
     void KeyboardInput()
@@ -48,13 +79,9 @@ public class UserInput : MonoBehaviour
             return;
         }
 
-        player.Run(keyboard.leftShiftKey.isPressed);
-        player.Sneak(keyboard.leftCtrlKey.isPressed);
         bool escape = keyboard.escapeKey.isPressed;
 
         // Movement
-        Vector2 direction = Vector2.zero;
-
         if (keyboard.sKey.isPressed || keyboard.downArrowKey.isPressed)
         {
             direction.y -= 1;
@@ -72,13 +99,9 @@ public class UserInput : MonoBehaviour
             direction.y += 1;
         }
 
-        player.Move(direction);
-
-        // Jump
-        if (keyboard.spaceKey.isPressed)
-        {
-            player.Jump();
-        }
+        jump |= keyboard.spaceKey.isPressed;
+        run |= keyboard.leftShiftKey.isPressed;
+        sneak |= keyboard.leftCtrlKey.isPressed;
     }
 
     void MouseInput()

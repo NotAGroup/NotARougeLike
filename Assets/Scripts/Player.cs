@@ -3,7 +3,6 @@ using UnityEngine;
 [RequireComponent(typeof(CharacterController))]
 public class Player : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     private CharacterController characterController;
 
     private float gravity = -9.81f;
@@ -26,6 +25,7 @@ public class Player : MonoBehaviour
     public float maxStamina = 100.0f;
     public float currentStamina;
 
+    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         characterController = GetComponent<CharacterController>();
