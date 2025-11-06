@@ -6,6 +6,7 @@ public class UserInput : MonoBehaviour
     private Player player;
 
     private Vector2 direction;
+    private Vector2 rotation;
 
     private bool jump;
     private bool run;
@@ -15,6 +16,10 @@ public class UserInput : MonoBehaviour
     void Start()
     {
         player = GameObject.Find("Player").GetComponent<Player>();
+        rotation = Vector2.zero;
+
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
     }
 
     // Update is called once per frame
@@ -36,6 +41,7 @@ public class UserInput : MonoBehaviour
         player.Run(run);
         player.Sneak(sneak);
 
+        player.Rotate(rotation);
         player.Move(direction);
 
         if (jump)
@@ -59,7 +65,7 @@ public class UserInput : MonoBehaviour
         direction = gamepad.leftStick.ReadValue();
 
         // Camera
-        Vector2 rightStick = gamepad.rightStick.ReadValue();
+        rotation += gamepad.rightStick.ReadValue();
 
         jump |= gamepad.aButton.isPressed;
         run |= gamepad.leftStickButton.isPressed;
@@ -106,6 +112,14 @@ public class UserInput : MonoBehaviour
 
     void MouseInput()
     {
+        Mouse mouse = Mouse.current;
 
+        if (mouse == null)
+        {
+            return;
+        }
+
+        // Camera
+        rotation += mouse.delta.ReadValue();
     }
 }

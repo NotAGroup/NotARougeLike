@@ -3,6 +3,7 @@ using UnityEngine;
 [RequireComponent(typeof(CharacterController))]
 public class Player : MonoBehaviour
 {
+    private Transform cameraTransform;
     private CharacterController characterController;
 
     private float gravity = -9.81f;
@@ -28,6 +29,7 @@ public class Player : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        cameraTransform = GameObject.Find("Main Camera").GetComponent<Transform>();
         characterController = GetComponent<CharacterController>();
         currentStamina = maxStamina;
     }
@@ -101,6 +103,16 @@ public class Player : MonoBehaviour
         }
 
         run = value;
+    }
+
+    public void Rotate(Vector2 rotation)
+    {
+        // Player
+        transform.localRotation = Quaternion.AngleAxis(rotation.x, Vector3.up);
+
+        // Camera
+        float angle = Mathf.Clamp(rotation.y * 2, -90, 90.0f);
+        cameraTransform.localRotation = Quaternion.AngleAxis(angle, Vector3.left);
     }
 
     public void Sneak(bool value)
