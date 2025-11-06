@@ -12,6 +12,8 @@ public class UserInput : MonoBehaviour
     private bool run;
     private bool sneak;
 
+    public float mouseSensitivity = 0.1f;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -120,6 +122,6 @@ public class UserInput : MonoBehaviour
         }
 
         // Camera
-        rotation += mouse.delta.ReadValue();
+        rotation += mouse.delta.ReadValue() * mouseSensitivity;
     }
 }
