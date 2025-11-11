@@ -4,6 +4,7 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     // Components
+    private Camera playerCamera;
     private Transform cameraTransform;
     private CharacterController characterController;
 
@@ -17,7 +18,6 @@ public class Player : MonoBehaviour
 
     private float gravity = -9.81f;
 
-    private bool aim;
     private bool grounded;
     private bool run;
     private bool slide;
@@ -26,6 +26,7 @@ public class Player : MonoBehaviour
     private Vector3 motion;
     private Vector3 scale;
 
+    private float currentFOV;
     private float currentHealth;
     private float currentStamina;
 
@@ -33,6 +34,11 @@ public class Player : MonoBehaviour
 
     private float slideCooldown;
     private float slideTime;
+
+    [Header("Camera")]
+    public float normalFOV = 60.0f;
+    public float aimFOV = 30.0f;
+    public float zoomSpeed = 10.0f;
 
     [Header("Movement")]
     public float runSpeed = 10.0f;
@@ -60,7 +66,10 @@ public class Player : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        cameraTransform = GameObject.Find("Main Camera").GetComponent<Transform>();
+        GameObject mainCamera = GameObject.Find("Main Camera");
+
+        playerCamera = mainCamera.GetComponent<Camera>();
+        cameraTransform = mainCamera.GetComponent<Transform>();
         characterController = GetComponent<CharacterController>();
 
         attackType = AttackType.Shoot;
@@ -111,6 +120,8 @@ public class Player : MonoBehaviour
             }
         }
 
+        playerCamera.fieldOfView = Mathf.Lerp(playerCamera.fieldOfView, currentFOV, zoomSpeed * Time.deltaTime);
+
         characterController.Move(motion * Time.deltaTime);
 
         RegenerateHealth();
@@ -119,13 +130,14 @@ public class Player : MonoBehaviour
 
     public void Aim(bool value)
     {
-        // TODO
         if (value)
         {
-            Debug.Log("Aime");
+            currentFOV = aimFOV;
         }
-
-        aim = value;
+        else
+        {
+            currentFOV = normalFOV;
+        }
     }
 
     public void Attack(AttackType? type = null)
