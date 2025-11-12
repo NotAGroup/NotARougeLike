@@ -32,6 +32,7 @@ public class Player : MonoBehaviour
     private float currentStamina;
 
     private float defaultYScale;
+    private float fireCooldown;
 
     private float slideCooldown;
     private float slideTime;
@@ -40,6 +41,12 @@ public class Player : MonoBehaviour
     public float normalFOV = 60.0f;
     public float aimFOV = 30.0f;
     public float zoomSpeed = 10.0f;
+
+    [Header("Combat")]
+    public Projectile[] projectiles;
+    public GameObject weapon;
+    public float fireRate = 3.0f;
+    public float hitRange = 2.0f;
 
     [Header("Movement")]
     public float runSpeed = 10.0f;
@@ -98,6 +105,15 @@ public class Player : MonoBehaviour
         else
         {
             motion.y = 0.0f;
+        }
+
+        if (fireCooldown > 0.0f)
+        {
+            fireCooldown -= Time.deltaTime;
+            if (fireCooldown < 0.0f)
+            {
+                fireCooldown = 0.0f;
+            }
         }
 
         if (slide)
@@ -295,8 +311,16 @@ public class Player : MonoBehaviour
 
     void Shoot()
     {
-        // TODO
-        Debug.Log("Shoot");
+        if (fireCooldown > 0.0f || projectiles.Length == 0)
+        {
+            return;
+        }
+
+        Vector3 position = cameraTransform.position + transform.forward * 1.0f;
+        Quaternion rotation = cameraTransform.rotation;
+
+        Instantiate(projectiles[0], position, rotation);
+        fireCooldown = 1.0f / fireRate;
     }
 
     public void Slide(bool value)

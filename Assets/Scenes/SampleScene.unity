@@ -597,6 +597,11 @@ MonoBehaviour:
   normalFOV: 60
   aimFOV: 30
   zoomSpeed: 10
+  projectiles:
+  - {fileID: 7974811766441290857, guid: 60e49ade76f5c004293e0e18fd49dbb0, type: 3}
+  weapon: {fileID: 0}
+  fireRate: 3
+  hitRange: 2
   runSpeed: 15
   walkSpeed: 5
   sneakSpeed: 1
