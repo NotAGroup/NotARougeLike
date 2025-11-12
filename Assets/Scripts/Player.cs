@@ -4,9 +4,10 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     // Components
-    private Camera playerCamera;
     private Transform cameraTransform;
     private CharacterController characterController;
+    private InteractionArea interactArea;
+    private Camera playerCamera;
 
     public enum AttackType
     {
@@ -71,6 +72,7 @@ public class Player : MonoBehaviour
         playerCamera = mainCamera.GetComponent<Camera>();
         cameraTransform = mainCamera.GetComponent<Transform>();
         characterController = GetComponent<CharacterController>();
+        interactArea = GameObject.Find("Interaction Area").GetComponent<InteractionArea>();
 
         attackType = AttackType.Shoot;
 
@@ -185,8 +187,12 @@ public class Player : MonoBehaviour
 
     public void Interact()
     {
-        // TODO
-        Debug.Log("Interact");
+        if (interactArea.triggerObject != null)
+        {
+            // TODO
+            string name = interactArea.triggerObject.name;
+            Debug.Log("Interact with: " + name);
+        }
     }
 
     public bool isGrounded()
