@@ -296,6 +296,21 @@ public class Player : MonoBehaviour
         Debug.Log("Die");
     }
 
+    public float GetHealth()
+    {
+        return currentHealth;
+    }
+
+    public float GetMana()
+    {
+        return currentMana;
+    }
+
+    public float GetStamina()
+    {
+        return currentStamina;
+    }
+
     void Hit()
     {
         if (hitCooldown > 0.0f || hitState != HitState.Idle)
