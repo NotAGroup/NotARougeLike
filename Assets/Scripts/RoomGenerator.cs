@@ -29,6 +29,7 @@ public class RoomGenerator
             space.TopRightAreaCorner = newTopRightPoint;
             space.BottomRightAreaCorner = new Vector2Int(newTopRightPoint.x, newBottomLeftPoint.y);
             space.TopLeftAreaCorner = new Vector2Int(newBottomLeftPoint.x, newTopRightPoint.y);
+            space.Type = "room";
             listToReturn.Add((RoomNode)space);
                 
         }
