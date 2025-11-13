@@ -483,7 +483,10 @@ public class Player : MonoBehaviour
         Vector3 position = cameraTransform.position + transform.forward * 1.0f;
         Quaternion rotation = cameraTransform.rotation;
 
-        Instantiate(projectiles[0], position, rotation);
+        Projectile instance = Instantiate(projectiles[0], position, rotation);
+        instance.name = projectiles[0].name;
+        instance.SetDamage(10.0f);
+
         fireCooldown = 1.0f / fireRate;
     }
 

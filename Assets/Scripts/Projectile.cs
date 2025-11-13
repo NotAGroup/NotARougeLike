@@ -7,6 +7,8 @@ public class Projectile : MonoBehaviour
     private Rigidbody rigidBody;
     private SphereCollider sphereCollider;
 
+    private float damage;
+
     [Header("Properties")]
     public float speed;
     public float lifetime;
@@ -44,9 +46,27 @@ public class Projectile : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        // Destroy the projectile on impact
-        Debug.Log("Projectile hit: " + collision.gameObject.name);
+        string name = collision.gameObject.name;
+        Debug.Log("Projectile hit: " + name);
 
+        if (name.Contains("chest"))
+        {
+            Transform parent = collision.gameObject.transform.parent;
+            DestroyableObject destroyableObject = parent.GetComponent<DestroyableObject>();
+
+            if (destroyableObject != null)
+            {
+                Debug.Log("Projectile dealing " + damage + " damage to " + parent.name);
+                destroyableObject.TakeDamage(damage);
+            }
+        }
+
+        // Destroy the projectile on impact
         Destroy(this.gameObject);
+    }
+
+    public void SetDamage(float damage)
+    {
+        this.damage = damage;
     }
 }
