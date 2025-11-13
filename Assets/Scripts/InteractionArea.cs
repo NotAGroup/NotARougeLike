@@ -26,7 +26,7 @@ public class InteractionArea : MonoBehaviour
     {
         string name = other.gameObject.name;
 
-        if (name == "Interaction Area" || name == "Player")
+        if (name == "Blade" || name == "Interaction Area" || name == "Player")
         {
             // Ignore self triggers
             return;

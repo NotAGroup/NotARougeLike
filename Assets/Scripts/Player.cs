@@ -12,13 +12,23 @@ public class Player : MonoBehaviour
     private Transform leftShoulderTransform;
     private Transform rightShoulderTransform;
 
+    // Enumerations
     public enum AttackType
     {
         Hit,
         Shoot
     }
 
+    enum HitState
+    {
+        Idle,
+        Return,
+        Swing,
+        Strike
+    }
+
     private AttackType attackType;
+    private HitState hitState;
 
     private float gravity = -9.81f;
 
@@ -38,6 +48,16 @@ public class Player : MonoBehaviour
     private float defaultYScale;
     private float fireCooldown;
 
+    private float hitCooldown;
+    private float hitTime;
+
+    private Vector3 restRotation = new Vector3(0.0f, 0.0f, 0.0f);
+    private Vector3 swingRotation = new Vector3(-130.0f, 0.0f, 0.0f);
+    private Vector3 strikeRotation = new Vector3(-30.0f, 0.0f, 0.0f);
+
+    private Quaternion startRotation;
+    private Quaternion endRotation;
+
     private float slideCooldown;
     private float slideTime;
 
@@ -50,7 +70,10 @@ public class Player : MonoBehaviour
     public Projectile[] projectiles;
     public GameObject weapon;
     public float fireRate = 3.0f;
-    public float hitRange = 2.0f;
+    public float hitRate = 2.0f;
+    public float swingDuration = 0.4f;
+    public float strikeDuration = 0.2f;
+    public float returnDuration = 0.1f;
 
     [Header("Mana")]
     public float maxMana = 100.0f;
@@ -93,12 +116,22 @@ public class Player : MonoBehaviour
         rightShoulderTransform = GameObject.Find("Right Shoulder").GetComponent<Transform>();
 
         attackType = AttackType.Shoot;
+        hitState = HitState.Idle;
 
         currentHealth = maxHealth;
         currentMana = maxMana;
         currentStamina = maxStamina;
 
+        fireCooldown = 0.0f;
+        hitCooldown = 0.0f;
+        hitTime = 0.0f;
+
+        slideCooldown = 0.0f;
+        slideTime = 0.0f;
+
         defaultYScale = transform.localScale.y;
+
+        weapon.SetActive(false);
     }
 
     // Update is called once per frame
@@ -125,6 +158,57 @@ public class Player : MonoBehaviour
             if (fireCooldown < 0.0f)
             {
                 fireCooldown = 0.0f;
+            }
+        }
+
+        if (hitCooldown > 0.0f)
+        {
+            hitCooldown -= Time.deltaTime;
+            if (hitCooldown < 0.0f)
+            {
+                hitCooldown = 0.0f;
+            }
+        }
+
+        if (hitState != HitState.Idle)
+        {
+            hitTime += Time.deltaTime;
+
+            float duration = hitState == HitState.Swing ? swingDuration :
+                             hitState == HitState.Strike ? strikeDuration : returnDuration;
+
+            float ratio = Mathf.Clamp(hitTime / duration, 0.0f, 1.0f);
+
+            rightShoulderTransform.localRotation = Quaternion.Slerp(startRotation, endRotation, ratio);
+
+            if (ratio >= 1.0f)
+            {
+                switch (hitState)
+                {
+                    case HitState.Swing:
+                        hitState = HitState.Strike;
+                        hitTime = 0.0f;
+
+                        startRotation = Quaternion.Euler(swingRotation);
+                        endRotation = Quaternion.Euler(strikeRotation);
+                        break;
+                    case HitState.Strike:
+                        hitState = HitState.Return;
+                        hitTime = 0.0f;
+
+                        startRotation = Quaternion.Euler(strikeRotation);
+                        endRotation = Quaternion.Euler(restRotation);
+                        break;
+                    case HitState.Return:
+                        hitState = HitState.Idle;
+                        hitCooldown = 1.0f / hitRate;
+
+                        weapon.SetActive(false);
+                        break;
+                    default:
+                        Debug.LogError("Unknown Hit State: " + hitState);
+                        return;
+                }
             }
         }
 
@@ -210,8 +294,18 @@ public class Player : MonoBehaviour
 
     void Hit()
     {
-        // TODO
-        Debug.Log("Hit");
+        if (hitCooldown > 0.0f || hitState != HitState.Idle)
+        {
+            return;
+        }
+
+        weapon.SetActive(true);
+
+        hitState = HitState.Swing;
+        hitTime = 0.0f;
+
+        startRotation = rightShoulderTransform.localRotation;
+        endRotation = Quaternion.Euler(swingRotation);
     }
 
     public void Interact()
@@ -280,7 +374,7 @@ public class Player : MonoBehaviour
 
         float ratio = Time.deltaTime * 5.0f;
 
-        if (attackType != AttackType.Hit && (direction.x != 0.0f || direction.y != 0.0f) && !slide)
+        if (hitState == HitState.Idle && (direction.x != 0.0f || direction.y != 0.0f) && !slide)
         {
             float amplitude = 2.0f * speed;
             float frequency = 5.0f;
