@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Collections;
 using UnityEngine;
 
 public class DungeonCreator : MonoBehaviour
@@ -9,6 +10,7 @@ public class DungeonCreator : MonoBehaviour
     public int roomWidthMin, roomLengthMin;
     public int maxIterations;
     public int corridorWidth;
+    public float lootProb;
     public Material material;
     [Range(0.0f, 0.3f)]
     public float roomBottomCornerModifier;
@@ -16,7 +18,7 @@ public class DungeonCreator : MonoBehaviour
     public float roomTopCornerMidifier;
     [Range(0, 2)]
     public int roomOffset;
-    public GameObject wallVertical, wallHorizontal;
+    public GameObject wallVertical, wallHorizontal, chestPrefab, enemyPrefab;
     List<Vector3Int> possibleDoorVerticalPosition;
     List<Vector3Int> possibleDoorHorizontalPosition;
     List<Vector3Int> possibleWallHorizontalPosition;
@@ -49,6 +51,61 @@ public class DungeonCreator : MonoBehaviour
             CreateMesh(listOfRooms[i].BottomLeftAreaCorner, listOfRooms[i].TopRightAreaCorner);
         }
         CreateWalls(wallParent);
+        CreateLoot(listOfRooms);
+        CreateEnemy(listOfRooms);
+        //CreatePlayer(listOfRooms);
+    }
+
+    private void CreatePlayer(List<Node> listOfRooms)
+    {
+        Node room = findFurthestRoomFromBoss(listOfRooms);
+        int posX = (room.BottomRightAreaCorner.x - room.BottomLeftAreaCorner.x) / 2;
+        int posY = (room.TopRightAreaCorner.y - room.BottomRightAreaCorner.y) / 2;
+    }
+
+    private Node findFurthestRoomFromBoss(List<Node> listOfRooms)
+    {
+        throw new NotImplementedException();
+    }
+
+    private void CreateEnemy(List<Node> listOfRooms)
+    {
+        foreach( var room in listOfRooms)
+        {
+            if (room.Type == "room")
+            {
+                int enemyPosX = UnityEngine.Random.Range(room.BottomLeftAreaCorner.x + 2, room.BottomRightAreaCorner.x - 1);
+                int enemyPosY = UnityEngine.Random.Range(room.BottomLeftAreaCorner.y + 2, room.TopLeftAreaCorner.y - 1);
+                Vector3 enemyPos = new Vector3(
+                    enemyPosX,
+                    1,
+                    enemyPosY);
+                if(UnityEngine.Random.Range(0f,1f) > 0.3)
+                {
+                    Instantiate(enemyPrefab, enemyPos, Quaternion.identity);
+                }   
+            }
+        }
+    }
+
+    private void CreateLoot(List<Node> listOfRooms)
+    {
+        foreach( var room in listOfRooms)
+        {
+            if (room.Type == "room")
+            {
+                int chestX = UnityEngine.Random.Range(room.BottomLeftAreaCorner.x + 2, room.BottomRightAreaCorner.x - 1);
+                int chestY = UnityEngine.Random.Range(room.BottomLeftAreaCorner.y + 2, room.TopLeftAreaCorner.y - 1);
+                Vector3 chestPos = new Vector3(
+                    chestX,
+                    0.35f,
+                    chestY);
+                if(UnityEngine.Random.Range(0f,1f) > lootProb)
+                {
+                    Instantiate(chestPrefab, chestPos, Quaternion.identity);
+                }   
+            }
+        }
     }
 
     private void CreateWalls(GameObject wallParent)
@@ -112,22 +169,22 @@ public class DungeonCreator : MonoBehaviour
         dungeonFloor.AddComponent<MeshCollider>();
         dungeonFloor.transform.parent = transform;
 
-        for (int row = (int)bottomLeftV.x; row < (int)bottomRightV.x; row++)
+        for (int row = (int)Math.Ceiling(bottomLeftV.x); row < (int)Math.Ceiling(bottomRightV.x); row++)
         {
             var wallPosition = new Vector3(row, 0, bottomLeftV.z);
             AddWallPositionToList(wallPosition, possibleWallHorizontalPosition, possibleDoorHorizontalPosition);
         }
-        for (int row = (int)topLeftV.x; row < (int)topRightCorner.x; row++)
+        for (int row = (int)Math.Ceiling(topLeftV.x); row < (int)Math.Ceiling(topRightCorner.x); row++)
         {
             var wallPosition = new Vector3(row, 0, topRightV.z);
             AddWallPositionToList(wallPosition, possibleWallHorizontalPosition, possibleDoorHorizontalPosition);
         }
-        for (int col = (int)bottomLeftV.z; col < (int)topLeftV.z; col++)
+        for (int col = (int)Math.Ceiling(bottomLeftV.z); col < (int)Math.Ceiling(topLeftV.z); col++)
         {
             var wallPosition = new Vector3(bottomLeftV.x, 0, col);
             AddWallPositionToList(wallPosition, possibleWallVerticalPosition, possibleDoorVerticalPosition);
         }
-        for (int col = (int)bottomRightV.z; col < (int)topRightV.z; col++)
+        for (int col = (int)Math.Ceiling(bottomRightV.z); col < (int)Math.Ceiling(topRightV.z); col++)
         {
             var wallPosition = new Vector3(bottomRightV.x, 0, col);
             AddWallPositionToList(wallPosition, possibleWallVerticalPosition, possibleDoorVerticalPosition);
