@@ -1,11 +1,13 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using Unity.Collections;
+using Unity.AI.Navigation;
 using UnityEngine;
 
+[RequireComponent(typeof(NavMeshSurface))]
 public class DungeonCreator : MonoBehaviour
 {
+    private NavMeshSurface navMeshSurface;
+
     public int dungeonWidth, dungeonLength;
     public int roomWidthMin, roomLengthMin;
     public int maxIterations;
@@ -26,7 +28,11 @@ public class DungeonCreator : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        navMeshSurface = GetComponent<NavMeshSurface>();
+
         CreateDungeon();
+
+        navMeshSurface.BuildNavMesh();
     }
 
     public void CreateDungeon()

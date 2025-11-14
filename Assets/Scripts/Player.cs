@@ -72,7 +72,7 @@ public class Player : MonoBehaviour
 
     [Header("Combat")]
     public Projectile[] projectiles;
-    public GameObject weapon;
+    public Weapon weapon;
     public float fireRate = 3.0f;
     public float hitRate = 2.0f;
     public float swingDuration = 0.4f;
@@ -135,7 +135,7 @@ public class Player : MonoBehaviour
 
         defaultYScale = transform.localScale.y;
 
-        weapon.SetActive(false);
+        weapon.gameObject.SetActive(false);
     }
 
     // Update is called once per frame
@@ -207,7 +207,7 @@ public class Player : MonoBehaviour
                         hitState = HitState.Idle;
                         hitCooldown = 1.0f / hitRate;
 
-                        weapon.SetActive(false);
+                        weapon.gameObject.SetActive(false);
                         break;
                     default:
                         Debug.LogError("Unknown Hit State: " + hitState);
@@ -296,6 +296,21 @@ public class Player : MonoBehaviour
         Debug.Log("Die");
     }
 
+    public float GetHealth()
+    {
+        return currentHealth;
+    }
+
+    public float GetMana()
+    {
+        return currentMana;
+    }
+
+    public float GetStamina()
+    {
+        return currentStamina;
+    }
+
     void Hit()
     {
         if (hitCooldown > 0.0f || hitState != HitState.Idle)
@@ -303,7 +318,8 @@ public class Player : MonoBehaviour
             return;
         }
 
-        weapon.SetActive(true);
+        weapon.gameObject.SetActive(true);
+        weapon.SetDamage(20.0f);
 
         hitState = HitState.Swing;
         hitTime = 0.0f;
@@ -483,7 +499,10 @@ public class Player : MonoBehaviour
         Vector3 position = cameraTransform.position + transform.forward * 1.0f;
         Quaternion rotation = cameraTransform.rotation;
 
-        Instantiate(projectiles[0], position, rotation);
+        Projectile instance = Instantiate(projectiles[0], position, rotation);
+        instance.name = projectiles[0].name;
+        instance.SetDamage(10.0f);
+
         fireCooldown = 1.0f / fireRate;
     }
 
