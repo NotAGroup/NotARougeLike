@@ -706,6 +706,7 @@ MonoBehaviour:
   maxIterations: 10
   corridorWidth: 5
   lootProb: 0.5
+  shopProb: 0.1
   material: {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
   roomBottomCornerModifier: 0
   roomTopCornerMidifier: 0.801
@@ -714,6 +715,7 @@ MonoBehaviour:
   wallHorizontal: {fileID: 6681959020437096135, guid: 866f20ae2d1c506c4b62b3e8bfd4d55c, type: 3}
   chestPrefab: {fileID: 801789873906574201, guid: e7b9dbe30139672529e028327be50597, type: 3}
   enemyPrefab: {fileID: 6185520913894418997, guid: eddd686a1205a0944a9c026cc9c7d74b, type: 3}
+  shopPrefab: {fileID: 8410230881569839391, guid: fab7d7c351eb0e9c7955ba13c50ba0da, type: 3}
 --- !u!114 &1896217531
 MonoBehaviour:
   m_ObjectHideFlags: 0
