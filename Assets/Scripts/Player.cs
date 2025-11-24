@@ -328,28 +328,56 @@ public class Player : MonoBehaviour
         endRotation = Quaternion.Euler(swingRotation);
     }
 
+
+    public bool Raycast(out RaycastHit hit) {
+        Vector3 position = cameraTransform.position + transform.forward * 0.3f;
+        return Physics.Raycast(position, cameraTransform.forward, out hit);
+    }
+
     public void Interact()
     {
+        string name = null;
+        // first check interaction area
         if (interactArea.triggerObject != null)
         {
-            string name = interactArea.triggerObject.name;
-
-            switch (name)
-            {
+            name = interactArea.triggerObject.name;
+            switch (name) {
                 case "health_fruit":
                     healthFruits += 1;
                     Destroy(interactArea.triggerObject);
-                    break;
-                    case "mana_fruit":
+                    return;
+                case "mana_fruit":
                     manaFruits += 1;
                     Destroy(interactArea.triggerObject);
-                    break;
-                    case "stamina_fruit":
+                    return;
+                case "stamina_fruit":
                     staminaFruits += 1;
                     Destroy(interactArea.triggerObject);
+                    return;
+                default:
                     break;
+            }
+        }
+
+        if (Raycast(out RaycastHit hit)) {
+            if (hit.transform.gameObject.TryGetComponent<ShopItemSlot>(out ShopItemSlot slot)) {
+                name = slot.ItemName;
+                var cost = slot.Cost;
+                switch (name) {
+                    case "health_fruit":
+                        healthFruits += 1;
+                        break;
+                    case "mana_fruit":
+                        manaFruits += 1;
+                        break;
+                    case "stamina_fruit":
+                        staminaFruits += 1;
+                        break;
                     default:
-                    break;
+                        break;
+                }
+
+                slot.Disable();
             }
         }
     }
