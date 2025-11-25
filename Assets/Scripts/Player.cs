@@ -329,14 +329,17 @@ public class Player : MonoBehaviour
     }
 
 
-    public bool Raycast(out RaycastHit hit) {
-        Vector3 position = cameraTransform.position + transform.forward * 0.3f;
-        return Physics.Raycast(position, cameraTransform.forward, out hit);
+    public bool RaycastInteractible(out RaycastHit hit) {
+        Vector3 position = cameraTransform.position + cameraTransform.forward * 0.1f;
+        Debug.DrawRay(position, cameraTransform.forward, Color.white, 1.0f);
+        var interactionDistance = 10f;
+        return Physics.Raycast(position, cameraTransform.forward, out hit, interactionDistance, ~LayerMask.GetMask("Player"));
     }
 
     public void Interact()
     {
         string name = null;
+
         // first check interaction area
         if (interactArea.triggerObject != null)
         {
@@ -359,10 +362,11 @@ public class Player : MonoBehaviour
             }
         }
 
-        if (Raycast(out RaycastHit hit)) {
+        if (RaycastInteractible(out RaycastHit hit)) {
             if (hit.transform.gameObject.TryGetComponent<ShopItemSlot>(out ShopItemSlot slot)) {
                 name = slot.ItemName;
                 var cost = slot.Cost;
+                Debug.Log("Buying " + name);
                 switch (name) {
                     case "health_fruit":
                         healthFruits += 1;
