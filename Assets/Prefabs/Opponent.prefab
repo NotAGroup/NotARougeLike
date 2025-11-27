@@ -319,7 +319,8 @@ Transform:
   m_LocalPosition: {x: 0, y: -0.8, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 434861976613719245}
   m_Father: {fileID: 5762675550769429007}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &6185520913894418997
@@ -477,7 +478,7 @@ NavMeshAgent:
   m_Enabled: 1
   m_AgentTypeID: 0
   m_Radius: 0.5
-  m_Speed: 1.5
+  m_Speed: 3
   m_Acceleration: 4
   avoidancePriority: 50
   m_AngularSpeed: 120
@@ -501,8 +502,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 26eca20a2ebcb2d40a7b9dad62ee364d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Opponent
-  attackRange: 2
-  detectionRange: 10
+  weapon: {fileID: 2146401393748505461}
+  hitRate: 2
+  swingDuration: 0.4
+  strikeDuration: 0.2
+  returnDuration: 0.1
+  attackRange: 3
+  detectionRange: 15
+  playerGotHit: 0
   maxHealth: 100
   healthRegRate: 5
   wanderInterval: 3
@@ -539,3 +546,88 @@ Transform:
   - {fileID: 5762675550769429007}
   m_Father: {fileID: 7663185937033281623}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &3071253999127610414
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1948424970995635301}
+    m_Modifications:
+    - target: {fileID: 1472596751792853166, guid: c8a8d03b03bb37d4db1dda777932e492, type: 3}
+      propertyPath: m_Name
+      value: Opp_Weapon
+      objectReference: {fileID: 0}
+    - target: {fileID: 3213240907052435683, guid: c8a8d03b03bb37d4db1dda777932e492, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 3213240907052435683, guid: c8a8d03b03bb37d4db1dda777932e492, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 3213240907052435683, guid: c8a8d03b03bb37d4db1dda777932e492, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 3213240907052435683, guid: c8a8d03b03bb37d4db1dda777932e492, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3213240907052435683, guid: c8a8d03b03bb37d4db1dda777932e492, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3213240907052435683, guid: c8a8d03b03bb37d4db1dda777932e492, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3213240907052435683, guid: c8a8d03b03bb37d4db1dda777932e492, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.6963643
+      objectReference: {fileID: 0}
+    - target: {fileID: 3213240907052435683, guid: c8a8d03b03bb37d4db1dda777932e492, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.6963643
+      objectReference: {fileID: 0}
+    - target: {fileID: 3213240907052435683, guid: c8a8d03b03bb37d4db1dda777932e492, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.122787856
+      objectReference: {fileID: 0}
+    - target: {fileID: 3213240907052435683, guid: c8a8d03b03bb37d4db1dda777932e492, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.122787856
+      objectReference: {fileID: 0}
+    - target: {fileID: 3213240907052435683, guid: c8a8d03b03bb37d4db1dda777932e492, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 3213240907052435683, guid: c8a8d03b03bb37d4db1dda777932e492, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: -20
+      objectReference: {fileID: 0}
+    - target: {fileID: 3213240907052435683, guid: c8a8d03b03bb37d4db1dda777932e492, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: c8a8d03b03bb37d4db1dda777932e492, type: 3}
+--- !u!4 &434861976613719245 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 3213240907052435683, guid: c8a8d03b03bb37d4db1dda777932e492, type: 3}
+  m_PrefabInstance: {fileID: 3071253999127610414}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2146401393748505461 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: -5235780296733378725, guid: c8a8d03b03bb37d4db1dda777932e492, type: 3}
+  m_PrefabInstance: {fileID: 3071253999127610414}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b71ab5f1e7dc37c4db41091756dc2457, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Opp_Weapon
