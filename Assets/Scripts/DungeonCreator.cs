@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using Unity.AI.Navigation;
+using Unity.Mathematics;
+using Unity.VisualScripting;
+using UnityEditor;
+using UnityEditor.ProjectWindowCallback;
 using UnityEngine;
 
 [RequireComponent(typeof(NavMeshSurface))]
@@ -20,7 +24,7 @@ public class DungeonCreator : MonoBehaviour
     public float roomTopCornerMidifier;
     [Range(0, 2)]
     public int roomOffset;
-    public GameObject wallVertical, wallHorizontal, chestPrefab, enemyPrefab, shopPrefab;
+    public GameObject wallPrefab, playerPrefab, chestPrefab, enemyPrefab, shopPrefab;
     List<Vector3Int> possibleDoorVerticalPosition;
     List<Vector3Int> possibleDoorHorizontalPosition;
     List<Vector3Int> possibleWallHorizontalPosition;
@@ -52,6 +56,7 @@ public class DungeonCreator : MonoBehaviour
         possibleDoorHorizontalPosition = new List<Vector3Int>();
         possibleWallHorizontalPosition = new List<Vector3Int>();
         possibleWallVerticalPosition = new List<Vector3Int>();
+        CreatePlayer(listOfRooms);
         for (int i = 0; i < listOfRooms.Count; i++)
         {
             CreateMesh(listOfRooms[i].BottomLeftAreaCorner, listOfRooms[i].TopRightAreaCorner);
@@ -60,19 +65,24 @@ public class DungeonCreator : MonoBehaviour
         CreateLoot(listOfRooms);
         CreateEnemy(listOfRooms);
         CreateShop(listOfRooms);
-        //CreatePlayer(listOfRooms);
     }
 
     private void CreatePlayer(List<Node> listOfRooms)
     {
-        Node room = findFurthestRoomFromBoss(listOfRooms);
-        int posX = (room.BottomRightAreaCorner.x - room.BottomLeftAreaCorner.x) / 2;
-        int posY = (room.TopRightAreaCorner.y - room.BottomRightAreaCorner.y) / 2;
-    }
+        Node room = listOfRooms[UnityEngine.Random.Range(0, listOfRooms.Count)];
+        /*
+        float posX = (room.BottomRightAreaCorner.x- room.BottomLeftAreaCorner.x) / 2;
+        float posY = (room.TopRightAreaCorner.y - room.BottomRightAreaCorner.y) / 2;
+        playerPrefab.transform.SetPositionAndRotation(new Vector3(posX, 1, posY), Quaternion.identity);
+        */
 
-    private Node findFurthestRoomFromBoss(List<Node> listOfRooms)
-    {
-        throw new NotImplementedException();
+        int playerPosX = UnityEngine.Random.Range(room.BottomLeftAreaCorner.x + 2, room.BottomRightAreaCorner.x - 1);
+        int playerPosY = UnityEngine.Random.Range(room.BottomLeftAreaCorner.y + 2, room.TopLeftAreaCorner.y - 1);
+            Vector3 playerPos = new Vector3(
+                playerPosX,
+                2,
+                playerPosY);
+        playerPrefab.transform.SetPositionAndRotation(playerPos, Quaternion.identity);
     }
 
     private void CreateEnemy(List<Node> listOfRooms)
@@ -140,13 +150,74 @@ public class DungeonCreator : MonoBehaviour
 
     private void CreateWalls(GameObject wallParent)
     {
+        int wallPosX = 0;
+        int wallPosY = 3;
+        int wallPosZ = 0;
+        int startX = -1;
+        int startZ = -1;
+        int temp = 0;
         foreach (var wallPosition in possibleWallHorizontalPosition)
         {
-            CreateWall(wallParent, wallPosition, wallHorizontal);
+            if (startX == -1)
+            {
+                startX = wallPosition.x;
+                wallPosZ = wallPosition.z;
+                temp = wallPosition.x;
+            }
+            else
+            {
+                if(wallPosition.x == temp+1)
+                {
+                    temp = wallPosition.x;
+                }
+                else
+                {
+                    int xScale = temp - startX;
+                    wallPrefab.transform.localScale = new Vector3(xScale, 6, 1);
+                    wallPosX = startX + xScale / 2;
+                    Vector3Int wallPos = new Vector3Int(
+                        wallPosX,
+                        wallPosY,
+                        wallPosZ
+                    );
+                    CreateWall(wallParent, wallPos, wallPrefab);
+                    startX = wallPosition.x;
+                    wallPosZ = wallPosition.z;
+                    temp = wallPosition.x;
+                }
+            }
         }
+        wallPrefab.transform.localScale = Vector3.one;
         foreach (var wallPosition in possibleWallVerticalPosition)
         {
-            CreateWall(wallParent, wallPosition, wallVertical);
+            if (startZ == -1)
+            {
+                startZ = wallPosition.z;
+                wallPosX = wallPosition.x;
+                temp = wallPosition.z;
+            }
+            else
+            {
+                if(wallPosition.z == temp+1)
+                {
+                    temp = wallPosition.z;
+                }
+                else
+                {
+                    int zScale = temp - startZ;
+                    wallPrefab.transform.localScale = new Vector3(1, 6, zScale);
+                    wallPosZ = startZ + zScale / 2;
+                    Vector3Int wallPos = new Vector3Int(
+                        wallPosX,
+                        wallPosY,
+                        wallPosZ
+                    );
+                    CreateWall(wallParent, wallPos, wallPrefab);
+                    startZ = wallPosition.z;
+                    wallPosX = wallPosition.x;
+                    temp = wallPosition.z;
+                }
+            }
         }
     }
 
@@ -154,6 +225,7 @@ public class DungeonCreator : MonoBehaviour
     {
         Instantiate(wallPrefab, wallPosition, Quaternion.identity, wallParent.transform);
     }
+    
 
     private void CreateMesh(Vector2 bottomLeftCorner, Vector2 topRightCorner)
     {
