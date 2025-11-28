@@ -5,7 +5,9 @@ using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEditor.ProjectWindowCallback;
+using UnityEditor.Rendering;
 using UnityEngine;
+using Random = System.Random;
 
 [RequireComponent(typeof(NavMeshSurface))]
 public class DungeonCreator : MonoBehaviour
@@ -25,10 +27,11 @@ public class DungeonCreator : MonoBehaviour
     [Range(0, 2)]
     public int roomOffset;
     public GameObject wallPrefab, playerPrefab, chestPrefab, enemyPrefab, shopPrefab;
-    List<Vector3Int> possibleDoorVerticalPosition;
-    List<Vector3Int> possibleDoorHorizontalPosition;
-    List<Vector3Int> possibleWallHorizontalPosition;
-    List<Vector3Int> possibleWallVerticalPosition;
+    List<Vector3Int> possibleVerticalDoorPosition;
+    List<Vector3Int> possibleHorizontalDoorPosition;
+    List<Vector3Int> possibleHorizontalWallPosition;
+    List<Vector3Int> possibleVerticalWallPosition;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -52,16 +55,16 @@ public class DungeonCreator : MonoBehaviour
             corridorWidth);
         GameObject wallParent = new GameObject("WallParent");
         wallParent.transform.parent = transform;
-        possibleDoorVerticalPosition = new List<Vector3Int>();
-        possibleDoorHorizontalPosition = new List<Vector3Int>();
-        possibleWallHorizontalPosition = new List<Vector3Int>();
-        possibleWallVerticalPosition = new List<Vector3Int>();
+        possibleHorizontalDoorPosition = new List<Vector3Int>();
+        possibleVerticalDoorPosition = new List<Vector3Int>();
+        possibleHorizontalWallPosition = new List<Vector3Int>();
+        possibleVerticalWallPosition = new List<Vector3Int>();
         CreatePlayer(listOfRooms);
         for (int i = 0; i < listOfRooms.Count; i++)
         {
-            CreateMesh(listOfRooms[i].BottomLeftAreaCorner, listOfRooms[i].TopRightAreaCorner);
+            CreateMesh(listOfRooms[i].BottomLeftAreaCorner, listOfRooms[i].TopRightAreaCorner, listOfRooms[i].Type);
         }
-        CreateWalls_old(wallParent);
+        CreateWalls(wallParent);
         CreateLoot(listOfRooms);
         CreateEnemy(listOfRooms);
         CreateShop(listOfRooms);
@@ -144,14 +147,23 @@ public class DungeonCreator : MonoBehaviour
 
     private void CreateWalls(GameObject wallParent)
     {
-        int wallPosX = 0;
-        int wallPosY = 3;
-        int wallPosZ = 0;
+        // To Cap the possibleWalls Lists
+        possibleHorizontalWallPosition.Add(possibleHorizontalWallPosition[0]);
+        possibleVerticalWallPosition.Add(possibleVerticalWallPosition[0]);
+        Random rng = new Random();
+        int start = possibleHorizontalWallPosition[0].x;
+        int wallLength;
+        float wallDetail;
+        float wallPosX = 0;
+        int wallPosY = 0;
+        float wallPosZ = 0;
         int startX = -1;
         int startZ = -1;
         int temp = 0;
-        foreach (var wallPosition in possibleWallHorizontalPosition)
+        float wallScaler = 4f;
+        foreach (var wallPosition in possibleHorizontalWallPosition)
         {
+            // Define starting point
             if (startX == -1)
             {
                 startX = wallPosition.x;
@@ -160,30 +172,58 @@ public class DungeonCreator : MonoBehaviour
             }
             else
             {
-                if(wallPosition.x == temp+1)
+                // check if coherent Wall, save end point as temp
+                if(wallPosition.x == temp + 1)
                 {
                     temp = wallPosition.x;
                 }
+                // (temp - start) = total length of wall
                 else
                 {
-                    int xScale = temp - startX;
-                    wallPrefab.transform.localScale = new Vector3(xScale, 6, 1);
-                    wallPosX = startX + xScale / 2;
-                    Vector3Int wallPos = new Vector3Int(
-                        wallPosX,
-                        wallPosY,
-                        wallPosZ
-                    );
-                    CreateWall(wallParent, wallPos, wallPrefab, Quaternion.identity);
+                    wallPosX = startX;
+                    wallLength = temp - startX;
+                    int segmentCount = (wallLength < 10) ? 2 : wallLength / 10 * 2 ;
+                    int cutCount = segmentCount - 1;
+
+                    List<float> cuts = new List<float>();
+                    for (int c = 0; c < cutCount; c++)
+                    {
+                        cuts.Add((float)(rng.NextDouble() * wallLength));
+                    }
+                    cuts.Sort();
+
+                    float[] segments = new float[segmentCount];
+
+                    if (segmentCount > 0)
+                        segments[0] = cuts[0];
+
+                    for (int c = 1; c < cutCount; c++)
+                        segments[c] = cuts[c] - cuts[c - 1];
+
+                    segments[segmentCount - 1] = wallLength - cuts[cutCount - 1];
+
+                    foreach (float xScale in segments)
+                    {
+                        wallPrefab.transform.localScale = new Vector3(xScale/wallScaler, 1, 1);
+                        wallPosX += xScale / 2;
+                        wallDetail = UnityEngine.Random.Range(-0.1f, 0.1f);
+                        Vector3 wallPos  = new Vector3(
+                            wallPosX,
+                            wallPosY,
+                            wallPosZ + wallDetail
+                        );  
+                        CreateWall(wallParent, wallPos, wallPrefab, Quaternion.identity);
+                        wallPosX += xScale / 2;
+                    }
                     startX = wallPosition.x;
                     wallPosZ = wallPosition.z;
                     temp = wallPosition.x;
                 }
             }
         }
-        wallPrefab.transform.localScale = Vector3.one;
-        foreach (var wallPosition in possibleWallVerticalPosition)
+        foreach (var wallPosition in possibleVerticalWallPosition)
         {
+            // Define starting point
             if (startZ == -1)
             {
                 startZ = wallPosition.z;
@@ -192,51 +232,53 @@ public class DungeonCreator : MonoBehaviour
             }
             else
             {
-                if(wallPosition.z == temp+1)
+                // check if coherent Wall, save end point as temp
+                if(wallPosition.z == temp + 1)
                 {
                     temp = wallPosition.z;
                 }
+                // (temp - start) = total length of wall
                 else
                 {
-                    int zScale = temp - startZ;
-                    wallPrefab.transform.localScale = new Vector3(1, 6, zScale);
-                    wallPosZ = startZ + zScale / 2;
-                    Vector3Int wallPos = new Vector3Int(
-                        wallPosX,
-                        wallPosY,
-                        wallPosZ
-                    );
-                    CreateWall(wallParent, wallPos, wallPrefab, Quaternion.identity);
+                    wallPosZ = startZ;
+                    wallLength = temp - startZ;
+                    int segmentCount = (wallLength < 10) ? 2 : wallLength / 10 * 2 ;
+                    int cutCount = segmentCount - 1;
+
+                    List<float> cuts = new List<float>();
+                    for (int c = 0; c < cutCount; c++)
+                    {
+                        cuts.Add((float)(rng.NextDouble() * wallLength));
+                    }
+                    cuts.Sort();
+
+                    float[] segments = new float[segmentCount];
+
+                    if (segmentCount > 0)
+                        segments[0] = cuts[0];
+
+                    for (int c = 1; c < cutCount; c++)
+                        segments[c] = cuts[c] - cuts[c - 1];
+
+                    segments[segmentCount - 1] = wallLength - cuts[cutCount - 1];
+
+                    foreach (float zScale in segments)
+                    {
+                        wallPrefab.transform.localScale = new Vector3(zScale/wallScaler, 1, 1);
+                        wallPosZ += zScale / 2;
+                        wallDetail = UnityEngine.Random.Range(-0.1f, 0.1f);
+                        Vector3 wallPos  = new Vector3(
+                            wallPosX + wallDetail,
+                            wallPosY,
+                            wallPosZ
+                        );  
+                        CreateWall(wallParent, wallPos, wallPrefab, Quaternion.Euler(0, 90, 0));
+                        wallPosZ += zScale / 2;
+                    }
                     startZ = wallPosition.z;
                     wallPosX = wallPosition.x;
                     temp = wallPosition.z;
                 }
-            }
-        }
-    }
-
-    private void CreateWalls_old(GameObject wallParent)
-    {
-        int wallOffset = 4;
-        float wallDetail;
-        int counter = 0;
-        wallPrefab.transform.localScale = Vector3.one;
-        foreach (var wallPosition in possibleWallHorizontalPosition)
-        {
-            counter++;
-            if(counter % wallOffset == 1)
-            {
-                wallDetail = UnityEngine.Random.Range(-0.1f, 0.1f);
-                CreateWall(wallParent, new Vector3(wallPosition.x, wallPosition.y, wallPosition.z + wallDetail), wallPrefab, Quaternion.identity);
-            }
-        }
-        counter = 0;
-        foreach (var wallPosition in possibleWallVerticalPosition)
-        {
-            counter++;
-            if(counter % wallOffset == 1)
-            {
-                CreateWall(wallParent, wallPosition, wallPrefab, Quaternion.Euler(0, 90, 0));
             }
         }
     }
@@ -247,7 +289,7 @@ public class DungeonCreator : MonoBehaviour
     }
     
 
-    private void CreateMesh(Vector2 bottomLeftCorner, Vector2 topRightCorner)
+    private void CreateMesh(Vector2 bottomLeftCorner, Vector2 topRightCorner, String roomType)
     {
         Vector3 bottomLeftV = new Vector3(bottomLeftCorner.x, 0, bottomLeftCorner.y);
         Vector3 bottomRightV = new Vector3(topRightCorner.x, 0, bottomLeftCorner.y);
@@ -294,22 +336,24 @@ public class DungeonCreator : MonoBehaviour
         for (int row = (int)Math.Ceiling(bottomLeftV.x); row < (int)Math.Ceiling(bottomRightV.x); row++)
         {
             var wallPosition = new Vector3(row, 0, bottomLeftV.z);
-            AddWallPositionToList(wallPosition, possibleWallHorizontalPosition, possibleDoorHorizontalPosition);
+            AddWallPositionToList(wallPosition, possibleHorizontalWallPosition, possibleHorizontalDoorPosition);                
+            
         }
         for (int row = (int)Math.Ceiling(topLeftV.x); row < (int)Math.Ceiling(topRightCorner.x); row++)
         {
             var wallPosition = new Vector3(row, 0, topRightV.z);
-            AddWallPositionToList(wallPosition, possibleWallHorizontalPosition, possibleDoorHorizontalPosition);
+            AddWallPositionToList(wallPosition, possibleHorizontalWallPosition, possibleHorizontalDoorPosition);                
+            
         }
         for (int col = (int)Math.Ceiling(bottomLeftV.z); col < (int)Math.Ceiling(topLeftV.z); col++)
         {
             var wallPosition = new Vector3(bottomLeftV.x, 0, col);
-            AddWallPositionToList(wallPosition, possibleWallVerticalPosition, possibleDoorVerticalPosition);
+            AddWallPositionToList(wallPosition, possibleVerticalWallPosition, possibleVerticalDoorPosition);                
         }
         for (int col = (int)Math.Ceiling(bottomRightV.z); col < (int)Math.Ceiling(topRightV.z); col++)
         {
             var wallPosition = new Vector3(bottomRightV.x, 0, col);
-            AddWallPositionToList(wallPosition, possibleWallVerticalPosition, possibleDoorVerticalPosition);
+            AddWallPositionToList(wallPosition, possibleVerticalWallPosition, possibleVerticalDoorPosition);                
         }
     }
 
@@ -317,7 +361,6 @@ public class DungeonCreator : MonoBehaviour
     {
         Vector3Int point = Vector3Int.CeilToInt(wallPosition);
         if (wallList.Contains(point)){
-            doorList.Add(point);
             wallList.Remove(point);
         }
         else
