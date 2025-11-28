@@ -676,11 +676,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6795d3382dceb1a9aa269697de515a95, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DungeonCreator
-  dungeonWidth: 100
-  dungeonLength: 100
-  roomWidthMin: 25
-  roomLengthMin: 25
-  maxIterations: 12
+  dungeonWidth: 128
+  dungeonLength: 128
+  roomWidthMin: 24
+  roomLengthMin: 24
+  maxIterations: 16
   corridorWidth: 5
   lootProb: 0.5
   shopProb: 0.1

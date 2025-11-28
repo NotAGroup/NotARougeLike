@@ -61,7 +61,7 @@ public class DungeonCreator : MonoBehaviour
         {
             CreateMesh(listOfRooms[i].BottomLeftAreaCorner, listOfRooms[i].TopRightAreaCorner);
         }
-        CreateWalls(wallParent);
+        CreateWalls_old(wallParent);
         CreateLoot(listOfRooms);
         CreateEnemy(listOfRooms);
         CreateShop(listOfRooms);
@@ -70,12 +70,6 @@ public class DungeonCreator : MonoBehaviour
     private void CreatePlayer(List<Node> listOfRooms)
     {
         Node room = listOfRooms[UnityEngine.Random.Range(0, listOfRooms.Count)];
-        /*
-        float posX = (room.BottomRightAreaCorner.x- room.BottomLeftAreaCorner.x) / 2;
-        float posY = (room.TopRightAreaCorner.y - room.BottomRightAreaCorner.y) / 2;
-        playerPrefab.transform.SetPositionAndRotation(new Vector3(posX, 1, posY), Quaternion.identity);
-        */
-
         int playerPosX = UnityEngine.Random.Range(room.BottomLeftAreaCorner.x + 2, room.BottomRightAreaCorner.x - 1);
         int playerPosY = UnityEngine.Random.Range(room.BottomLeftAreaCorner.y + 2, room.TopLeftAreaCorner.y - 1);
             Vector3 playerPos = new Vector3(
@@ -180,7 +174,7 @@ public class DungeonCreator : MonoBehaviour
                         wallPosY,
                         wallPosZ
                     );
-                    CreateWall(wallParent, wallPos, wallPrefab);
+                    CreateWall(wallParent, wallPos, wallPrefab, Quaternion.identity);
                     startX = wallPosition.x;
                     wallPosZ = wallPosition.z;
                     temp = wallPosition.x;
@@ -212,7 +206,7 @@ public class DungeonCreator : MonoBehaviour
                         wallPosY,
                         wallPosZ
                     );
-                    CreateWall(wallParent, wallPos, wallPrefab);
+                    CreateWall(wallParent, wallPos, wallPrefab, Quaternion.identity);
                     startZ = wallPosition.z;
                     wallPosX = wallPosition.x;
                     temp = wallPosition.z;
@@ -221,9 +215,35 @@ public class DungeonCreator : MonoBehaviour
         }
     }
 
-    private void CreateWall(GameObject wallParent, Vector3Int wallPosition, GameObject wallPrefab)
+    private void CreateWalls_old(GameObject wallParent)
     {
-        Instantiate(wallPrefab, wallPosition, Quaternion.identity, wallParent.transform);
+        int wallOffset = 4;
+        float wallDetail;
+        int counter = 0;
+        wallPrefab.transform.localScale = Vector3.one;
+        foreach (var wallPosition in possibleWallHorizontalPosition)
+        {
+            counter++;
+            if(counter % wallOffset == 1)
+            {
+                wallDetail = UnityEngine.Random.Range(-0.1f, 0.1f);
+                CreateWall(wallParent, new Vector3(wallPosition.x, wallPosition.y, wallPosition.z + wallDetail), wallPrefab, Quaternion.identity);
+            }
+        }
+        counter = 0;
+        foreach (var wallPosition in possibleWallVerticalPosition)
+        {
+            counter++;
+            if(counter % wallOffset == 1)
+            {
+                CreateWall(wallParent, wallPosition, wallPrefab, Quaternion.Euler(0, 90, 0));
+            }
+        }
+    }
+   
+    private void CreateWall(GameObject wallParent, Vector3 wallPosition, GameObject wallPrefab, Quaternion rotation)
+    {
+        Instantiate(wallPrefab, wallPosition, rotation, wallParent.transform);
     }
     
 
